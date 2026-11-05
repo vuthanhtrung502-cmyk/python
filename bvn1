@@ -1,0 +1,114 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+
+df = pd.read_excel("danh_sach_1000_san_pham.xlsx")
+
+# 1. Top 10 sản phẩm bán chạy nhất
+top10_ban_chay = (
+    df.groupby("ten_san_pham")["so_luong_ban"].sum().nlargest(10)
+)
+top10_ban_chay.plot(kind="bar", color="blue")
+plt.title("1. Top 10 san pham ban chay nhat")
+plt.xlabel("San pham")
+plt.ylabel("So luong ban")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
+
+# 2. Top 10 sản phẩm bán chậm nhất
+top10_ban_cham = (
+    df.groupby("ten_san_pham")["so_luong_ban"].sum().nsmallest(10)
+)
+top10_ban_cham.plot(kind="bar", color="red")
+plt.title("2. Top 10 san pham ban cham nhat")
+plt.xlabel("San pham")
+plt.ylabel("So luong ban")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
+
+# 3. Sản phẩm sắp hết hàng (ví dụ: tồn kho < 10)
+sap_het_hang = df[df["ton_kho"] < 10].head(10)
+plt.bar(sap_het_hang["ten_san_pham"], sap_het_hang["ton_kho"], color="orange")
+plt.title("3. San pham sap het hang")
+plt.xlabel("San pham")
+plt.ylabel("Ton kho")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
+
+# 4. Sản phẩm tồn kho lâu (sắp xếp theo ngày nhập cũ nhất)
+df["ngay_nhap"] = pd.to_datetime(df["ngay_nhap"])
+ton_kho_lau = df.sort_values(by="ngay_nhap").head(10)
+plt.bar(
+    ton_kho_lau["ten_san_pham"], ton_kho_lau["ton_kho"], color="purple"
+)
+plt.title("4. San pham ton kho lau ngay")
+plt.xlabel("San pham")
+plt.ylabel("Ton kho")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
+
+# 5. Doanh thu theo tháng
+df["thang"] = df["ngay_nhap"].dt.to_period("M").astype(str)
+doanh_thu_thang = df.groupby("thang")["doanh_thu"].sum()
+doanh_thu_thang.plot(kind="line", marker="o", color="green")
+plt.title("5. Doanh thu theo thang")
+plt.xlabel("Thang")
+plt.ylabel("Doanh thu")
+plt.grid(True)
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# 6. Doanh thu theo danh mục sản phẩm
+doanh_thu_dm = df.groupby("danh_muc")["doanh_thu"].sum()
+doanh_thu_dm.plot(kind="pie", autopct="%1.1f%%", startangle=140)
+plt.title("6. Doanh thu theo danh muc san pham")
+plt.ylabel("")
+plt.tight_layout()
+plt.show()
+
+# 7. Tỷ lệ tăng trưởng doanh thu theo tháng
+tang_truong = doanh_thu_thang.pct_change() * 100
+tang_truong.plot(kind="bar", color="cyan")
+plt.title("7. Ty le tang truong doanh thu theo thang (%)")
+plt.xlabel("Thang")
+plt.ylabel("Tang truong (%)")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# 8. Giá trị hàng tồn kho theo danh mục
+df["gia_tri_ton"] = df["ton_kho"] * df["gia_von"]
+gia_tri_dm = df.groupby("danh_muc")["gia_tri_ton"].sum()
+gia_tri_dm.plot(kind="bar", color="brown")
+plt.title("8. Gia tri hang ton kho theo danh muc")
+plt.xlabel("Danh muc")
+plt.ylabel("Tong gia tri ton")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
+
+# 9. Dự báo nhu cầu sản phẩm (Trung bình số lượng bán)
+nhu_cau = df.groupby("ten_san_pham")["so_luong_ban"].mean().nlargest(10)
+nhu_cau.plot(kind="bar", color="teal")
+plt.title("9. Du bao nhu cau san pham (Trung binh ban ra)")
+plt.xlabel("San pham")
+plt.ylabel("So luong trung binh")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
+
+# 10. Lợi nhuận ước tính theo sản phẩm
+loi_nhuan_sp = (
+    df.groupby("ten_san_pham")["loi_nhuan"].sum().nlargest(10)
+)
+loi_nhuan_sp.plot(kind="bar", color="magenta")
+plt.title("10. Loi nhuan uoc tinh theo san pham")
+plt.xlabel("San pham")
+plt.ylabel("Loi nhuan")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
